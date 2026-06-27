@@ -7,7 +7,7 @@ namespace Gared\Polyless;
 final class PolyfillCatalog
 {
     /**
-     * @return array<string, string>
+     * @return array<lowercase-string, numeric-string>
      */
     public function versionPolyfills(): array
     {
@@ -30,7 +30,7 @@ final class PolyfillCatalog
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<lowercase-string, list<lowercase-string>>
      */
     public function extensionPolyfills(): array
     {

@@ -7,7 +7,6 @@ namespace Gared\Polyless\Tests;
 use Composer\Package\BasePackage;
 use Gared\Polyless\PolyfillPackageFilter;
 use Gared\Polyless\ProjectContext;
-use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class PolyfillPackageFilterTest extends TestCase

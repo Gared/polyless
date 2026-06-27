@@ -13,8 +13,8 @@ final class ProjectContextTest extends TestCase
     {
         $context = new ProjectContext('^8.3', ['ext-intl', 'ext-mbstring'], []);
 
-        self::assertTrue($context->requiresAnyExtension(['EXT-INTL']));
-        self::assertTrue($context->requiresAnyExtension(['ext-uuid', 'EXT-MBSTRING']));
+        self::assertTrue($context->requiresAnyExtension(['ext-intl']));
+        self::assertTrue($context->requiresAnyExtension(['ext-uuid', 'ext-mbstring']));
         self::assertFalse($context->requiresAnyExtension(['ext-iconv']));
     }
 
@@ -22,7 +22,7 @@ final class ProjectContextTest extends TestCase
     {
         $context = new ProjectContext('^8.3', [], ['symfony/polyfill-php80']);
 
-        self::assertTrue($context->isDirectlyRequired('SYMFONY/POLYFILL-PHP80'));
+        self::assertTrue($context->isDirectlyRequired('symfony/polyfill-php80'));
         self::assertFalse($context->isDirectlyRequired('symfony/polyfill-php81'));
     }
 

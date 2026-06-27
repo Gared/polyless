@@ -6,6 +6,7 @@ namespace Gared\Polyless;
 
 use Composer\Semver\Intervals;
 use Composer\Semver\VersionParser;
+use UnexpectedValueException;
 
 final class PhpConstraintEvaluator
 {
@@ -25,7 +26,7 @@ final class PhpConstraintEvaluator
         try {
             $project = $this->versionParser->parseConstraints($projectConstraint);
             $minimum = $this->versionParser->parseConstraints('>=' . $minimumVersion);
-        } catch (\UnexpectedValueException) {
+        } catch (UnexpectedValueException) {
             return false;
         }
 

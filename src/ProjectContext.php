@@ -6,16 +6,16 @@ namespace Gared\Polyless;
 
 use Composer\Composer;
 
-final class ProjectContext
+final readonly class ProjectContext
 {
     /**
      * @param list<string> $requiredExtensions
      * @param list<string> $directPolyfillRequirements
      */
     public function __construct(
-        private readonly ?string $phpConstraint,
-        private readonly array $requiredExtensions,
-        private readonly array $directPolyfillRequirements,
+        private ?string $phpConstraint,
+        private array $requiredExtensions,
+        private array $directPolyfillRequirements,
     ) {
     }
 
@@ -77,7 +77,7 @@ final class ProjectContext
     public function requiresAnyExtension(array $extensions): bool
     {
         foreach ($extensions as $extension) {
-            if (in_array(mb_strtolower($extension), $this->requiredExtensions, true)) {
+            if (in_array($extension, $this->requiredExtensions, true)) {
                 return true;
             }
         }
@@ -87,7 +87,7 @@ final class ProjectContext
 
     public function isDirectlyRequired(string $packageName): bool
     {
-        return in_array(mb_strtolower($packageName), $this->directPolyfillRequirements, true);
+        return in_array($packageName, $this->directPolyfillRequirements, true);
     }
 }
 

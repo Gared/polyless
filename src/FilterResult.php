@@ -6,15 +6,15 @@ namespace Gared\Polyless;
 
 use Composer\Package\BasePackage;
 
-final class FilterResult
+final readonly class FilterResult
 {
     /**
      * @param array<BasePackage> $packages
      * @param list<string> $filteredPackageNames
      */
     public function __construct(
-        private readonly array $packages,
-        private readonly array $filteredPackageNames,
+        private array $packages,
+        private array $filteredPackageNames,
     ) {
     }
 

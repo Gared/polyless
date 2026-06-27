@@ -21,13 +21,21 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
 
     private PolyfillPackageFilter $packageFilter;
 
+    private ExtensionRequirementAdvisor $extensionRequirementAdvisor;
+
     private ?ProjectContext $projectContext = null;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $printedExtensionSuggestions = [];
 
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->composer = $composer;
         $this->io = $io;
         $this->packageFilter = new PolyfillPackageFilter();
+        $this->extensionRequirementAdvisor = new ExtensionRequirementAdvisor();
 
         $this->refreshPlan();
     }
@@ -88,8 +96,10 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
             return;
         }
 
-        $this->projectContext = ProjectContext::fromComposer($this->composer);
-        $disabledPackageNames = $this->packageFilter->buildDisabledPackageNames($this->projectContext);
+        $projectContext = ProjectContext::fromComposer($this->composer);
+        $this->projectContext = $projectContext;
+        $this->printExtensionRequirementSuggestions($projectContext);
+        $disabledPackageNames = $this->packageFilter->buildDisabledPackageNames($projectContext);
 
         if ($disabledPackageNames === []) {
             return;
@@ -103,6 +113,44 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
                 implode(', ', $disabledPackageNames)
             ));
         }
+    }
+
+    private function printExtensionRequirementSuggestions(ProjectContext $context): void
+    {
+        $suggestedRequirements = $this->extensionRequirementAdvisor->buildSuggestedExtensionRequirements(
+            $context,
+            $this->installedPackageNames(),
+        );
+
+        foreach ($suggestedRequirements as $polyfillPackageName => $extensionRequirement) {
+            $suggestionKey = $polyfillPackageName . ':' . $extensionRequirement;
+            if (isset($this->printedExtensionSuggestions[$suggestionKey])) {
+                continue;
+            }
+
+            $this->printedExtensionSuggestions[$suggestionKey] = $suggestionKey;
+
+            $this->io->write(sprintf(
+                '<info>polyless</info>: "%s" is installed and your PHP runtime already has "%s". Consider adding "%s" to your project requirements to remove the polyfill.',
+                $polyfillPackageName,
+                mb_substr($extensionRequirement, 4),
+                $extensionRequirement,
+            ));
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function installedPackageNames(): array
+    {
+        $installedPackageNames = [];
+        foreach ($this->composer->getRepositoryManager()->getLocalRepository()->getPackages() as $package) {
+            $packageName = mb_strtolower($package->getName());
+            $installedPackageNames[$packageName] = $packageName;
+        }
+
+        return array_values($installedPackageNames);
     }
 
     /**
