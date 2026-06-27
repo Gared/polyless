@@ -1,0 +1,55 @@
+{
+  "name": "gared/polyless",
+  "description": "Composer plugin that removes unnecessary Symfony polyfill packages",
+  "type": "composer-plugin",
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "composer-plugin-api": "^2.0",
+    "composer/semver": "^3.4"
+  },
+  "require-dev": {
+    "composer/composer": "^2.10",
+    "phpunit/phpunit": "^11.5",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^2.2"
+  },
+  "replace": {
+    "symfony/polyfill-php54": "*",
+    "symfony/polyfill-php55": "*",
+    "symfony/polyfill-php56": "*",
+    "symfony/polyfill-php70": "*",
+    "symfony/polyfill-php71": "*",
+    "symfony/polyfill-php72": "*",
+    "symfony/polyfill-php73": "*",
+    "symfony/polyfill-php74": "*",
+    "symfony/polyfill-php80": "*",
+    "symfony/polyfill-php81": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Gared\\Polyless\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Gared\\Polyless\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "class": "Gared\\Polyless\\PolylessPlugin"
+  },
+  "authors": [
+    {
+      "name": "Stefan Müller",
+      "email": "stefan@stefans-entwicklerecke.de"
+    }
+  ],
+  "minimum-stability": "stable",
+  "config": {
+    "allow-plugins": {
+      "phpstan/extension-installer": true
+    },
+    "sort-packages": true
+  }
+}
