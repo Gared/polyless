@@ -12,7 +12,27 @@ The current basic implementation disables polyfills when one of these conditions
 
 Direct root requirements for a specific `symfony/polyfill-*` package are left untouched.
 
+## Usage
+
+Add this package to your project dev dependencies:
+
+```bash
+composer require --dev gared/polyless
+```
+
+You need to allow this package to run as a plugin!
+
+After that run:
+
+```bash
+composer update symfony/polyfill-*
+```
+
+to remove any unnecessary polyfill packages from your project.
+
 ## Current examples
+
+### PHP polyfills
 
 If your project requires PHP 8.5:
 
@@ -34,3 +54,13 @@ then the plugin can replace packages such as:
 - `symfony/polyfill-php85`
 
 If your project requires `ext-intl`, polyfills such as `symfony/polyfill-intl-grapheme` and `symfony/polyfill-intl-normalizer` can also be skipped.
+
+### Extension polyfills
+
+If you composer.lock contains `symfony/polyfill-mbstring` you can run the following command to require the `ext-mbstring` extension instead (of course you need to have the PHP extension installed):
+
+```bash
+composer require ext-mbstring
+```
+
+this will automatically remove the `symfony/polyfill-mbstring` package from your project.
