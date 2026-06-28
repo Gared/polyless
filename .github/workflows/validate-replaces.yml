@@ -38,7 +38,6 @@ jobs:
           cd "$workdir"
 
           composer init --name ci/polyfill-check --no-interaction
-          composer require "${{ matrix.required-extension }}" --no-interaction --no-progress
           composer require symfony/string:^7.4 --no-interaction --no-progress
 
           echo "Validating that ${{ matrix.polyfill-package }} is installed after requiring symfony/string"
@@ -47,8 +46,20 @@ jobs:
           composer config repositories.polyless path "$GITHUB_WORKSPACE"
           composer config allow-plugins.gared/polyless true
           composer config minimum-stability dev
+          composer config prefer-stable true
 
-          composer require --dev gared/polyless:@dev --no-interaction --no-progress
+          output=$(composer require --dev gared/polyless:@dev --no-interaction 2>&1 || true)
+          echo "$output"
+
+          if echo "$output" | grep -q "polyless: \"${{ matrix.polyfill-package }}\" is installed"; then
+            echo "✓ Found polyless suggestion message for ${{ matrix.polyfill-package }}"
+          else
+            echo "✗ Missing polyless suggestion message for ${{ matrix.polyfill-package }}"
+            exit 1
+          fi
+
+          composer require "${{ matrix.required-extension }}" --no-interaction --no-progress
+
           composer update "${{ matrix.polyfill-package }}" --no-interaction --no-progress
 
           echo "Validating that ${{ matrix.polyfill-package }} is not installed anymore"
