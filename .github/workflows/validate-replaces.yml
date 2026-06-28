@@ -1,0 +1,48 @@
+name: Composer Polyfill Intl Normalizer Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-polyfill-install-state:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          extensions: intl
+
+      - name: Validate intl polyfill replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          workdir="$(mktemp -d)"
+          cd "$workdir"
+
+          composer init --name ci/polyfill-check --no-interaction
+          composer require symfony/string --no-interaction --no-progress
+
+          echo "Validating that symfony/polyfill-intl-normalizer is installed after requiring symfony/string"
+          composer show symfony/polyfill-intl-normalizer --no-ansi > /dev/null
+
+          composer config repositories.polyless path "$GITHUB_WORKSPACE"
+          composer config allow-plugins.gared/polyless true
+
+          composer require --dev gared/polyless:dev-main --no-interaction --no-progress
+          composer update symfony/polyfill-intl-normalizer --no-interaction --no-progress
+
+          echo "Validating that symfony/polyfill-intl-normalizer is not installed anymore"
+          if composer show symfony/polyfill-intl-normalizer --no-ansi > /dev/null 2>&1; then
+            echo "symfony/polyfill-intl-normalizer is still installed"
+            exit 1
+          fi

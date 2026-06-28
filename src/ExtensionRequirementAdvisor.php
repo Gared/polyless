@@ -47,11 +47,11 @@ final class ExtensionRequirementAdvisor
             }
 
             foreach ($extensions as $extensionRequirement) {
-                if (!$this->isExtensionInstalled($extensionRequirement)) {
+                if (!$this->isExtensionLoaded($extensionRequirement)) {
                     continue;
                 }
 
-                $suggestedRequirements[$normalizedPackageName] = mb_strtolower($extensionRequirement);
+                $suggestedRequirements[$normalizedPackageName] = $extensionRequirement;
                 break;
             }
         }
@@ -61,7 +61,7 @@ final class ExtensionRequirementAdvisor
         return $suggestedRequirements;
     }
 
-    private function isExtensionInstalled(string $extensionRequirement): bool
+    private function isExtensionLoaded(string $extensionRequirement): bool
     {
         $extensionName = mb_strtolower($extensionRequirement);
         if (str_starts_with($extensionName, 'ext-')) {
