@@ -1,4 +1,4 @@
-name: Composer Polyfill Intl Normalizer Check
+name: Test Polyfill replacements
 
 on:
   push:
@@ -11,9 +11,17 @@ permissions:
 jobs:
   validate-polyfill-install-state:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - required-extension: ext-intl
+            polyfill-package: symfony/polyfill-intl-normalizer
+          - required-extension: ext-mbstring
+            polyfill-package: symfony/polyfill-mbstring
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -21,7 +29,7 @@ jobs:
           tools: composer:v2
           extensions: intl
 
-      - name: Validate intl polyfill replacement
+      - name: Validate polyfill replacement
         shell: bash
         run: |
           set -euo pipefail
@@ -30,19 +38,32 @@ jobs:
           cd "$workdir"
 
           composer init --name ci/polyfill-check --no-interaction
-          composer require symfony/string --no-interaction --no-progress
+          composer require symfony/string:^7.4 --no-interaction --no-progress
 
-          echo "Validating that symfony/polyfill-intl-normalizer is installed after requiring symfony/string"
-          composer show symfony/polyfill-intl-normalizer --no-ansi > /dev/null
+          echo "Validating that ${{ matrix.polyfill-package }} is installed after requiring symfony/string"
+          composer show "${{ matrix.polyfill-package }}" --no-ansi > /dev/null
 
           composer config repositories.polyless path "$GITHUB_WORKSPACE"
           composer config allow-plugins.gared/polyless true
+          composer config minimum-stability dev
+          composer config prefer-stable true
 
-          composer require --dev gared/polyless:dev-main --no-interaction --no-progress
-          composer update symfony/polyfill-intl-normalizer --no-interaction --no-progress
+          output=$(composer require --dev gared/polyless:@dev --no-interaction 2>&1 || true)
+          echo "$output"
 
-          echo "Validating that symfony/polyfill-intl-normalizer is not installed anymore"
-          if composer show symfony/polyfill-intl-normalizer --no-ansi > /dev/null 2>&1; then
-            echo "symfony/polyfill-intl-normalizer is still installed"
+          if echo "$output" | grep -q "polyless: \"${{ matrix.polyfill-package }}\" is installed"; then
+            echo "✓ Found polyless suggestion message for ${{ matrix.polyfill-package }}"
+          else
+            echo "✗ Missing polyless suggestion message for ${{ matrix.polyfill-package }}"
+            exit 1
+          fi
+
+          composer require "${{ matrix.required-extension }}" --no-interaction --no-progress
+
+          composer update "${{ matrix.polyfill-package }}" --no-interaction --no-progress
+
+          echo "Validating that ${{ matrix.polyfill-package }} is not installed anymore"
+          if composer show "${{ matrix.polyfill-package }}" --no-ansi > /dev/null 2>&1; then
+            echo "${{ matrix.polyfill-package }} is still installed"
             exit 1
           fi
