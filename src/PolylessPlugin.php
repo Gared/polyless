@@ -23,6 +23,8 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
 
     private ExtensionRequirementAdvisor $extensionRequirementAdvisor;
 
+    private ComposerJsonReplacementWriter $composerJsonReplacementWriter;
+
     private ?ProjectContext $projectContext = null;
 
     /**
@@ -36,6 +38,7 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
         $this->io = $io;
         $this->packageFilter = new PolyfillPackageFilter();
         $this->extensionRequirementAdvisor = new ExtensionRequirementAdvisor();
+        $this->composerJsonReplacementWriter = new ComposerJsonReplacementWriter();
 
         $this->refreshPlan();
     }
@@ -106,6 +109,7 @@ final class PolylessPlugin implements PluginInterface, EventSubscriberInterface
         }
 
         $this->injectRootReplacements($disabledPackageNames);
+        $this->composerJsonReplacementWriter->persist($disabledPackageNames);
 
         if ($this->io->isVerbose()) {
             $this->io->write(sprintf(

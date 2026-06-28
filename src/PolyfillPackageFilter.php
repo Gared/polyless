@@ -21,7 +21,7 @@ final class PolyfillPackageFilter
     }
 
     /**
-     * @return list<string>
+     * @return list<lowercase-string>
      */
     public function buildDisabledPackageNames(ProjectContext $context): array
     {
